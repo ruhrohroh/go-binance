@@ -26,11 +26,8 @@ func newWsConfig(endpoint string) *WsConfig {
 const MISSING_MARKET_DATA_THRESHOLD time.Duration = 2 * time.Second
 
 func wsServeFunc(cfg *WsConfig, handler WsHandler, errHandler ErrHandler, threshold ...time.Duration) (doneC, stopC chan struct{}, restartC chan bool, err error) {
-	// ctx, cancel := context.WithCancel(context.Background())
-	// c, _, err := websocket.Dial(ctx, cfg.Endpoint, nil)
 	c, _, err := websocket.DefaultDialer.Dial(cfg.Endpoint, nil)
 	if err != nil {
-		// cancel()
 		return nil, nil, nil, err
 	}
 	c.SetReadLimit(655350)
@@ -46,7 +43,6 @@ func wsServeFunc(cfg *WsConfig, handler WsHandler, errHandler ErrHandler, thresh
 		defer close(stopC)
 		defer close(restartC)
 		defer close(receivedDataC)
-		// defer cancel()
 		if WebsocketKeepalive {
 			keepAlive(c, WebsocketTimeout)
 		}
@@ -75,14 +71,12 @@ func wsServeFunc(cfg *WsConfig, handler WsHandler, errHandler ErrHandler, thresh
 					close = true
 				}
 				if close {
-					// _ = c.Close(websocket.StatusNormalClosure, "normal closure")
 					c.Close()
 					return
 				}
 			}
 		}()
 		for {
-			// _, message, readErr := c.Read(ctx)
 			_, message, readErr := c.ReadMessage()
 			if readErr != nil {
 				if !silent {
@@ -101,25 +95,6 @@ func wsServeFunc(cfg *WsConfig, handler WsHandler, errHandler ErrHandler, thresh
 }
 
 var wsServe = wsServeFunc
-
-// func keepAlive(ctx context.Context, c *websocket.Conn, d time.Duration) {
-// 	t := time.NewTimer(d)
-// 	defer t.Stop()
-// 	for {
-// 		select {
-// 		case <-ctx.Done():
-// 			return
-// 		case <-t.C:
-// 		}
-
-// 		err := c.Ping(ctx)
-// 		if err != nil {
-// 			return
-// 		}
-
-// 		t.Reset(d)
-// 	}
-// }
 
 func keepAlive(c *websocket.Conn, timeout time.Duration) {
 	ticker := time.NewTicker(timeout)
