@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"nhooyr.io/websocket"
+	"github.com/gorilla/websocket"
 )
 
 // WsHandler handle raw websocket message
@@ -27,10 +27,11 @@ func newWsConfig(endpoint string) *WsConfig {
 const MISSING_MARKET_DATA_THRESHOLD time.Duration = 2 * time.Second
 
 func wsServeFunc(cfg *WsConfig, handler WsHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, restartC chan bool, err error) {
-	ctx, cancel := context.WithCancel(context.Background())
-	c, _, err := websocket.Dial(ctx, cfg.Endpoint, nil)
+	// ctx, cancel := context.WithCancel(context.Background())
+	// c, _, err := websocket.Dial(ctx, cfg.Endpoint, nil)
+	c, _, err := websocket.DefaultDialer.Dial(cfg.Endpoint, nil)
 	if err != nil {
-		cancel()
+		// cancel()
 		return nil, nil, nil, err
 	}
 	c.SetReadLimit(655350)
@@ -46,9 +47,11 @@ func wsServeFunc(cfg *WsConfig, handler WsHandler, errHandler ErrHandler) (doneC
 		defer close(stopC)
 		defer close(restartC)
 		defer close(receivedDataC)
-		defer cancel()
+		// defer cancel()
 		if WebsocketKeepalive {
-			go keepAlive(ctx, c, WebsocketTimeout)
+			// go keepAlive(ctx, c, WebsocketTimeout)
+			keepAlive(c, WebsocketTimeout)
+
 		}
 		// Wait for the stopC channel to be closed.  We do that in a
 		// separate goroutine because ReadMessage is a blocking
@@ -71,13 +74,15 @@ func wsServeFunc(cfg *WsConfig, handler WsHandler, errHandler ErrHandler) (doneC
 					close = true
 				}
 				if close {
-					_ = c.Close(websocket.StatusNormalClosure, "normal closure")
+					// _ = c.Close(websocket.StatusNormalClosure, "normal closure")
+					c.Close()
 					return
 				}
 			}
 		}()
 		for {
-			_, message, readErr := c.Read(ctx)
+			// _, message, readErr := c.Read(ctx)
+			_, message, readErr := c.ReadMessage()
 			if readErr != nil {
 				if !silent {
 					errHandler(readErr)
@@ -96,21 +101,47 @@ func wsServeFunc(cfg *WsConfig, handler WsHandler, errHandler ErrHandler) (doneC
 
 var wsServe = wsServeFunc
 
-func keepAlive(ctx context.Context, c *websocket.Conn, d time.Duration) {
-	t := time.NewTimer(d)
-	defer t.Stop()
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-t.C:
-		}
+// func keepAlive(ctx context.Context, c *websocket.Conn, d time.Duration) {
+// 	t := time.NewTimer(d)
+// 	defer t.Stop()
+// 	for {
+// 		select {
+// 		case <-ctx.Done():
+// 			return
+// 		case <-t.C:
+// 		}
 
-		err := c.Ping(ctx)
-		if err != nil {
-			return
-		}
+// 		err := c.Ping(ctx)
+// 		if err != nil {
+// 			return
+// 		}
 
-		t.Reset(d)
-	}
+// 		t.Reset(d)
+// 	}
+// }
+
+func keepAlive(c *websocket.Conn, timeout time.Duration) {
+	ticker := time.NewTicker(timeout)
+	lastResponse := time.Now()
+	c.SetPongHandler(func(msg string) error {
+		lastResponse = time.Now()
+		return nil
+	})
+	go func() {
+		defer ticker.Stop()
+		for {
+			deadline := time.Now().Add(10 * time.Second)
+			err := c.WriteControl(websocket.PingMessage, []byte{}, deadline)
+			if err != nil {
+				return
+			}
+			<-ticker.C
+			if time.Since(lastResponse) > timeout {
+				c.Close()
+				return
+			}
+		}
+	}()
 }
+
+
