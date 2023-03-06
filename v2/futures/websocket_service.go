@@ -10,9 +10,9 @@ import (
 
 // Endpoints
 const (
-	baseWsMainUrl          = "wss://fstream-h.binance.com/ws"
+	baseWsMainUrl          = "wss://fstream.binance.com/ws"
 	baseWsTestnetUrl       = "wss://stream.binancefuture.com/ws"
-	baseCombinedMainURL    = "wss://fstream-h.binance.com/stream?streams="
+	baseCombinedMainURL    = "wss://fstream.binance.com/stream?streams="
 	baseCombinedTestnetURL = "wss://stream.binancefuture.com/stream?streams="
 )
 
