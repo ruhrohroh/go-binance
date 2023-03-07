@@ -6,8 +6,8 @@ import (
 	"github.com/gorilla/websocket"
 	"crypto/tls"
 	"net/http"
-	"errors"
-	"strconv"
+	// "errors"
+	// "strconv"
 
 )
 
@@ -41,13 +41,13 @@ func wsServeFunc(cfg *WsConfig, handler WsHandler, errHandler ErrHandler) (doneC
 		HandshakeTimeout: 45 * time.Second,
 		TLSClientConfig: tlsitup,
 	}
-	c, resp, err := d.Dial(cfg.Endpoint, nil)
-	hmm := resp.StatusCode
-	s1 := strconv.Itoa(hmm)
+	c, _, err := d.Dial(cfg.Endpoint, nil)
+	// hmm := resp.StatusCode
+	// s1 := strconv.Itoa(hmm)
 
-	say_what := errors.New("websocket: bad handshake " + s1)
+	// say_what := errors.New("websocket: bad handshake " + s1)
 	if err != nil {
-		return nil, nil, nil, say_what
+		return nil, nil, nil, err
 	}
 	c.SetReadLimit(655350)
 	doneC = make(chan struct{})
