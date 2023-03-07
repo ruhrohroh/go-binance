@@ -4,6 +4,8 @@ import (
 	"time"
 	// "net"
 	"github.com/gorilla/websocket"
+	"crypto/tls"
+
 )
 
 // WsHandler handle raw websocket message
@@ -26,11 +28,13 @@ func newWsConfig(endpoint string) *WsConfig {
 const MISSING_MARKET_DATA_THRESHOLD time.Duration = 2 * time.Second
 
 func wsServeFunc(cfg *WsConfig, handler WsHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, restartC chan bool, err error) {
-	c, _, err := websocket.DefaultDialer.Dial(cfg.Endpoint, nil)
+	// c, _, err := websocket.DefaultDialer.Dial(cfg.Endpoint, nil)
 	// d := websocket.Dialer{
-    //     NetDialContext: (&net.Dialer{LocalAddr: &net.TCPAddr{IP: ipAddress}}).DialContext,
+    //     TLSClientConfig: (tls.Config{InsecureSkipVerify: true}),
 	// }
-	// c, _, err := d.Dial(cfg.Endpoint, nil)
+	d := *websocket.DefaultDialer
+	d.TLSClientConfig.InsecureSkipVerify = true
+	c, _, err := d.Dial(cfg.Endpoint, nil)
 	if err != nil {
 		return nil, nil, nil, err
 	}
