@@ -6,14 +6,15 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	"net"
+	// "net"
 )
 
 // Endpoints
 const (
 	baseWsMainUrl          = "wss://fstream.binance.com/ws"
 	baseWsTestnetUrl       = "wss://stream.binancefuture.com/ws"
-	baseCombinedMainURL    = "wss://fstream.binance.com/stream?streams="
+	// baseCombinedMainURL    = "wss://fstream.binance.com/stream?streams="
+	baseCombinedMainURL    = "wss://18.65.205.67:443/stream?streams="
 	baseCombinedTestnetURL = "wss://stream.binancefuture.com/stream?streams="
 )
 
@@ -24,7 +25,7 @@ var (
 	WebsocketKeepalive = false
 	// UseTestnet switch all the WS streams from production to the testnet
 	UseTestnet = false
-	ipAddress = net.IPv4(18,65,205,67)
+	// ipAddress = net.IPv4(18,65,205,67)
 
 )
 
