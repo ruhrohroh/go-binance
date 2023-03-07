@@ -23,6 +23,8 @@ var (
 	WebsocketKeepalive = false
 	// UseTestnet switch all the WS streams from production to the testnet
 	UseTestnet = false
+	ipAddress = "54.238.69.122"
+
 )
 
 // getWsEndpoint return the base endpoint of the WS according the UseTestnet flag
