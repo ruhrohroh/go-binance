@@ -35,7 +35,7 @@ func wsServeFunc(cfg *WsConfig, handler WsHandler, errHandler ErrHandler) (doneC
 	d := websocket.Dialer{
 		Proxy:            http.ProxyFromEnvironment,
 		HandshakeTimeout: 45 * time.Second,
-		TLSClientConfig: tls.Config{InsecureSkipVerify: true}
+		TLSClientConfig: tls.Config{InsecureSkipVerify: true},
 	}
 	c, _, err := d.Dial(cfg.Endpoint, nil)
 	if err != nil {
