@@ -24,7 +24,7 @@ var (
 	WebsocketKeepalive = false
 	// UseTestnet switch all the WS streams from production to the testnet
 	UseTestnet = false
-	ipAddress = net.IPv4(54,238,69,122)
+	ipAddress = net.IPv4(18,65,205,67)
 
 )
 
