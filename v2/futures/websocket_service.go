@@ -14,7 +14,7 @@ const (
 	baseWsMainUrl          = "wss://fstream.binance.com/ws"
 	baseWsTestnetUrl       = "wss://stream.binancefuture.com/ws"
 	// baseCombinedMainURL    = "wss://fstream.binance.com/stream?streams="
-	baseCombinedMainURL    = "wss://18.181.134.197:443/stream?streams="
+	baseCombinedMainURL    = "wss://54.64.156.177:443/stream?streams="
 	// baseCombinedMainURL    = "wss://52.198.6.129:443/stream?streams="
 	baseCombinedTestnetURL = "wss://stream.binancefuture.com/stream?streams="
 )
