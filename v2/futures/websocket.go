@@ -4,7 +4,7 @@ import (
 	"time"
 	// "net"
 	"github.com/gorilla/websocket"
-	// "crypto/tls"
+	"crypto/tls"
 
 )
 
@@ -32,8 +32,11 @@ func wsServeFunc(cfg *WsConfig, handler WsHandler, errHandler ErrHandler) (doneC
 	// d := websocket.Dialer{
     //     TLSClientConfig: (tls.Config{InsecureSkipVerify: true}),
 	// }
-	d := websocket.DefaultDialer
-	d.TLSClientConfig.InsecureSkipVerify = true
+	d := websocket.Dialer{
+		Proxy:            http.ProxyFromEnvironment,
+		HandshakeTimeout: 45 * time.Second,
+		TLSClientConfig: tls.Config{InsecureSkipVerify: true}
+	}
 	c, _, err := d.Dial(cfg.Endpoint, nil)
 	if err != nil {
 		return nil, nil, nil, err
