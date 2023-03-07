@@ -41,8 +41,9 @@ func wsServeFunc(cfg *WsConfig, handler WsHandler, errHandler ErrHandler) (doneC
 		HandshakeTimeout: 45 * time.Second,
 		TLSClientConfig: tlsitup,
 	}
-	c, _, err := d.Dial(cfg.Endpoint, nil)
-	s1 := strconv.FormatInt(int64(_.StatusCode), 10)
+	c, resp, err := d.Dial(cfg.Endpoint, nil)
+	hmm := resp.StatusCode
+	s1 := strconv.Itoa(hmm)
 
 	say_what := errors.New("websocket: bad handshake " + s1)
 	if err != nil {
