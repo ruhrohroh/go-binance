@@ -993,7 +993,16 @@ func WsCombinedPartialDepthTradeBookTickerServe(symbolLevels map[string]string, 
 				errHandler(err)
 				return
 			}
-			thandler(t_event)
+			test_event := &WsTradeEventTest{
+				Time: t_event.Time,
+				TradeID: t_event.TradeID,
+				Price: t_event.Price,
+				Quantity: t_event.Quantity,
+				TradeTime: t_event.TradeTime,
+				IsBuyerMaker: t_event.IsBuyerMaker,
+				Endpoint: endpoint,
+			}
+			thandler(test_event)
 		} else if data["e"] == "bookTicker" {
 			b_event := new(WsBookTickerEvent)
 			jsonData, _ := json.Marshal(data)
