@@ -929,12 +929,12 @@ func WsTradeServe(connection_endpoint string, symbol string, handler WsTradeHand
 			return
 		}
 		test_event := &WsTradeEventTest{
-			Time: t_event.Time,
-			TradeID: t_event.TradeID,
-			Price: t_event.Price,
-			Quantity: t_event.Quantity,
-			TradeTime: t_event.TradeTime,
-			IsBuyerMaker: t_event.IsBuyerMaker,
+			Time: event.Time,
+			TradeID: event.TradeID,
+			Price: event.Price,
+			Quantity: event.Quantity,
+			TradeTime: event.TradeTime,
+			IsBuyerMaker: event.IsBuyerMaker,
 			Endpoint: connection_endpoint,
 		}
 		handler(test_event)
