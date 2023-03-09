@@ -918,21 +918,47 @@ func WsUserDataServe(listenKey string, handler WsUserDataHandler, errHandler Err
 type WsTradeHandler func(event *WsTradeEvent)
 
 // WsTradeServe serve websocket handler with a symbol
-func WsTradeServe(symbol string, handler WsTradeHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, restartC chan bool, err error) {
-	endpoint := fmt.Sprintf("%s/%s@trade", getWsEndpoint(), strings.ToLower(symbol))
+func WsTradeServe(connection_endpoint string, symbol string, handler WsTradeHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, restartC chan bool, err error) {
+	endpoint := fmt.Sprintf("%s/%s@trade", connection_endpoint, strings.ToLower(symbol))
 	cfg := newWsConfig(endpoint)
 	wsHandler := func(message []byte) {
-		event := new(WsTradeEvent)
-		err := json.Unmarshal(message, event)
+		j, err := newJSON(message)
 		if err != nil {
 			errHandler(err)
 			return
 		}
-		handler(event)
+		data := j.Get("data").MustMap()
+		t_event := new(WsTradeEvent)
+		jsonData, _ := json.Marshal(data)
+		err := json.Unmarshal(jsonData, t_event)
+
+		if err != nil {
+			errHandler(err)
+			return
+		}
+		test_event := &WsTradeEventTest{
+			Time: t_event.Time,
+			TradeId: t_event.TradeID,
+			Price: t_event.Price,
+			Quantity: t_event.Quantity,
+			TradeTime: t_event.TradeTime,
+			IsBuyerMaker: t_event.IsBuyerMaker,
+			Endpoint: connection_endpoint,
+		}
+		handler(test_event)
 	}
 	return wsServe(cfg, wsHandler, errHandler)
 }
 
+type WsTradeEventTest struct {
+	Time          int64  `json:"E"`
+	TradeID       int64  `json:"t"`
+	Price         string `json:"p"`
+	Quantity      string `json:"q"`
+	TradeTime     int64  `json:"T"`
+	IsBuyerMaker  bool   `json:"m"`
+	Endpoint      string `json:"ep"`
+}
 // WsTradeEvent define websocket trade event
 type WsTradeEvent struct {
 	Event         string `json:"e"`
