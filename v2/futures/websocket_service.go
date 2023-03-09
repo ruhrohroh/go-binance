@@ -922,16 +922,8 @@ func WsTradeServe(connection_endpoint string, symbol string, handler WsTradeHand
 	endpoint := fmt.Sprintf("%s/%s@trade", connection_endpoint, strings.ToLower(symbol))
 	cfg := newWsConfig(endpoint)
 	wsHandler := func(message []byte) {
-		j, err := newJSON(message)
-		if err != nil {
-			errHandler(err)
-			return
-		}
-		data := j.Get("data").MustMap()
-		t_event := new(WsTradeEvent)
-		jsonData, _ := json.Marshal(data)
-		err := json.Unmarshal(jsonData, t_event)
-
+		event := new(WsTradeEvent)
+		err := json.Unmarshal(message, event)
 		if err != nil {
 			errHandler(err)
 			return
