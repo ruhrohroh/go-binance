@@ -915,7 +915,7 @@ func WsUserDataServe(listenKey string, handler WsUserDataHandler, errHandler Err
 }
 
 // WsTradeHandler handle websocket trade event
-type WsTradeHandler func(event *WsTradeEvent)
+type WsTradeHandler func(event *WsTradeEventTest)
 
 // WsTradeServe serve websocket handler with a symbol
 func WsTradeServe(connection_endpoint string, symbol string, handler WsTradeHandler, errHandler ErrHandler) (doneC, stopC chan struct{}, restartC chan bool, err error) {
