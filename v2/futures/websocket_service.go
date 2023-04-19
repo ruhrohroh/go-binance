@@ -11,8 +11,10 @@ import (
 // Endpoints
 const (
 	baseWsMainUrl          = "wss://fstream-g.binance.com/ws"
+	baseWsMainUrlCoin          = "wss://dstream-g.binance.com/ws"
 	baseWsTestnetUrl       = "wss://stream.binancefuture.com/ws"
 	baseCombinedMainURL    = "wss://fstream-g.binance.com/stream?streams="
+	baseCombinedMainURLCoin    = "wss://dstream-g.binance.com/stream?streams="
 	baseCombinedTestnetURL = "wss://stream.binancefuture.com/stream?streams="
 )
 
@@ -40,6 +42,14 @@ func getCombinedEndpoint() string {
 	}
 	return baseCombinedMainURL
 }
+
+func getCombinedEndpointCoin() string {
+	if UseTestnet {
+		return baseCombinedTestnetURL
+	}
+	return baseCombinedMainURLCoin
+}
+
 
 // WsAggTradeEvent define websocket aggTrde event.
 type WsAggTradeEvent struct {
@@ -398,6 +408,18 @@ func WsAllMarketTickerServe(handler WsAllMarketTickerHandler, errHandler ErrHand
 	}
 	return wsServe(cfg, wsHandler, errHandler)
 }
+type WsBookTickerEventCoin struct {
+	Event           string `json:"e"`
+	UpdateID        int64  `json:"u"`
+	Symbol          string `json:"s"`
+	Pair            string `json:"ps"`
+	BestBidPrice    string `json:"b"`
+	BestBidQty      string `json:"B"`
+	BestAskPrice    string `json:"a"`
+	BestAskQty      string `json:"A"`
+	TransactionTime int64  `json:"T"`
+	Time            int64  `json:"E"`
+}
 
 // WsBookTickerEvent define websocket best book ticker event.
 type WsBookTickerEvent struct {
@@ -502,6 +524,19 @@ func WsAllLiquidationOrderServe(handler WsLiquidationOrderHandler, errHandler Er
 		handler(event)
 	}
 	return wsServe(cfg, wsHandler, errHandler)
+}
+
+type WsDepthEventCoin struct {
+	Event            string `json:"e"`
+	Time             int64  `json:"E"`
+	TransactionTime  int64  `json:"T"`
+	Symbol           string `json:"s"`
+	Pair             string `json:"ps"`
+	FirstUpdateID    int64  `json:"U"`
+	LastUpdateID     int64  `json:"u"`
+	PrevLastUpdateID int64  `json:"pu"`
+	Bids             []Bid  `json:"b"`
+	Asks             []Ask  `json:"a"`
 }
 
 // WsDepthEvent define websocket depth book event
@@ -944,8 +979,14 @@ type WsTradeEvent struct {
 }
 
 // WsCombinedPartialDepthServe is similar to WsPartialDepthServe, but it for multiple symbols
-func WsCombinedPartialDepthTradeBookTickerServe(symbolLevels map[string]string, rate string, dhandler WsDepthHandler, thandler WsTradeHandler, bhandler WsBookTickerHandler, errHandler ErrHandler, bookTicker bool) (doneC, stopC chan struct{}, restartC chan bool, err error) {
-	endpoint := getCombinedEndpoint()
+func WsCombinedPartialDepthTradeBookTickerServe(symbolLevels map[string]string, rate string, dhandler WsDepthHandler, thandler WsTradeHandler, bhandler WsBookTickerHandler, errHandler ErrHandler, bookTicker bool, is_coin bool) (doneC, stopC chan struct{}, restartC chan bool, err error) {
+	if is_coin!=true{
+		endpoint := getCombinedEndpoint()
+	}
+	else{
+		endpoint := getCombinedEndpointCoin()
+	}
+	
 	for s, l := range symbolLevels {
 		if bookTicker {
 			endpoint += fmt.Sprintf("%s@depth%s@%sms/%s@trade/%s@bookTicker", strings.ToLower(s), l, rate, strings.ToLower(s), strings.ToLower(s)) + "/"
@@ -972,7 +1013,12 @@ func WsCombinedPartialDepthTradeBookTickerServe(symbolLevels map[string]string, 
 			}
 			thandler(t_event)
 		} else if data["e"] == "bookTicker" {
-			b_event := new(WsBookTickerEvent)
+			if is_coin!=true{
+				b_event := new(WsBookTickerEvent)
+			}
+			else{
+				b_event := new(WsBookTickerEventCoin)
+			}
 			jsonData, _ := json.Marshal(data)
 			err := json.Unmarshal(jsonData, b_event)
 			if err != nil {
@@ -981,7 +1027,12 @@ func WsCombinedPartialDepthTradeBookTickerServe(symbolLevels map[string]string, 
 			}
 			bhandler(b_event)
 		} else {
-			d_event := new(WsDepthEvent)
+			if is_coin!=true{
+				d_event := new(WsDepthEvent)
+			}
+			else{
+				d_event := new(WsDepthEventCoin)
+			}
 			d_event.Event = data["e"].(string)
 			d_event.Time, _ = data["E"].(json.Number).Int64()
 			d_event.TransactionTime, _ = data["T"].(json.Number).Int64()
