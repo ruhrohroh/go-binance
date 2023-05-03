@@ -10,11 +10,11 @@ import (
 
 // Endpoints
 const (
-	baseWsMainUrl          = "wss://fstream.binance.com/ws"
-	baseWsMainUrlCoin          = "wss://dstream.binance.com/ws"
+	baseWsMainUrl          = "wss://fstream-h.binance.com/ws"
+	baseWsMainUrlCoin          = "wss://dstream-h.binance.com/ws"
 	baseWsTestnetUrl       = "wss://stream.binancefuture.com/ws"
-	baseCombinedMainURL    = "wss://fstream.binance.com/stream?streams="
-	baseCombinedMainURLCoin    = "wss://dstream.binance.com/stream?streams="
+	baseCombinedMainURL    = "wss://fstream-h.binance.com/stream?streams="
+	baseCombinedMainURLCoin    = "wss://dstream-h.binance.com/stream?streams="
 	baseCombinedTestnetURL = "wss://stream.binancefuture.com/stream?streams="
 )
 
@@ -984,6 +984,18 @@ type WsTradeEvent struct {
 }
 
 // WsCombinedPartialDepthServe is similar to WsPartialDepthServe, but it for multiple symbols
+type WsAggTradeEventCoin struct {
+	Event            string `json:"e"`
+	Time             int64  `json:"E"`
+	AggregateTradeID int64  `json:"a"`
+	Symbol           string `json:"s"`
+	Price            string `json:"p"`
+	Quantity         string `json:"q"`
+	FirstTradeID     int64  `json:"f"`
+	LastTradeID      int64  `json:"l"`
+	TradeTime        int64  `json:"T"`
+	Maker            bool   `json:"m"`
+}
 
 func WsCombinedPartialDepthTradeBookTickerServeCoin(symbolLevels map[string]string, rate string, dhandler WsDepthHandlerCoin, thandler WsTradeHandler, bhandler WsBookTickerHandlerCoin, errHandler ErrHandler, bookTicker bool) (doneC, stopC chan struct{}, restartC chan bool, err error) {
 	endpoint := getCombinedEndpointCoin()
